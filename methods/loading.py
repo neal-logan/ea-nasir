@@ -11,3 +11,7 @@ def load_data(path : str, files : list[str])-> ibis.:
     
 
     return df
+
+
+
+def 
