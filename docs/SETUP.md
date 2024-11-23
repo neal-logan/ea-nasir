@@ -3,8 +3,8 @@
 
 - Python 3.11.9 on Windows 10
 - Ibis framework with DuckDB backend for data manipulation
-- Pandas for interoperability between packages (hope to phase this out)
-- Skforecast for forecasting
+- Pandas for interoperability between packages
+- Skforecast for forecasting?
 - Probably something for reinforcement learning?
 
 ### Setup

@@ -1,7 +1,7 @@
 import ibis
 ibis.options.interactive = True
 
-def load_data(path : str, files : list[str])-> ibis.:
+def load_data_local(path : str, files : list[str])-> ibis.:
 
     frames = []
 
@@ -14,4 +14,4 @@ def load_data(path : str, files : list[str])-> ibis.:
 
 
 
-def 
+def load_data_remote()
