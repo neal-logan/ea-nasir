@@ -1,12 +1,8 @@
-##### Targets
+##### Prediction & Decisioning Target
 
 - [Copper](https://www.cmegroup.com/education/articles-and-reports/copper-financial-futures-faq.html)
 
-It's traditional
-
-##### Features
-
-###### Commodities Markets
+##### Features - Commodities Markets
 
 **Investing.com**
 - Copper
@@ -17,14 +13,14 @@ It's traditional
 - Crude oil
 - Soy
 
-###### Equities Markets
+###### Features - Equities Markets
 
 **Investing.com**
 - Russell 2000
 - S&P 500
 - VIX (volatility)
 
-###### Economic Indicators
+###### Features - Economic Indicators
 
 **FRED**
 - Consumer sentiment

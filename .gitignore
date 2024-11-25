@@ -163,4 +163,3 @@ cython_debug/
 
 # Datasets
 /data_raw
-/data_staged
