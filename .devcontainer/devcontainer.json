@@ -1,0 +1,17 @@
+{
+    "name": "Jupyter Notebook Environment",
+    "dockerFile": "../Dockerfile",
+    "customizations": {
+        "vscode": {
+            "extensions": [
+                "ms-python.python",
+                "ms-toolsai.jupyter"
+            ],
+            "settings": {
+                "python.defaultInterpreterPath": "/usr/local/bin/python"
+            }
+        }
+    },
+    "forwardPorts": [8888],
+    "postCreateCommand": "jupyter notebook --generate-config"
+}
