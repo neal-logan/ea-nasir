@@ -1,5 +1,6 @@
 import ibis
 import pandas as pd
+import numpy as np
 con = ibis.connect("duckdb://")
 
 # Merge multiple Ibis tables on the specific key
@@ -55,6 +56,7 @@ def merge_tables(
             # Cross-fill date from new x_DATE column
             # to existing DATE column 
             # and drop extraneous x_DATE column
+            # TODO un-hardcode this
             col_name = dataset_name + '_DATE'
             if col_name in merged_tables.columns: 
                 merged_tables = merged_tables.mutate(
@@ -65,7 +67,7 @@ def merge_tables(
                     
     return merged_tables
 
-def impute_forward_fill(
+def impute_forward_fill_numerics(
         data: ibis.Table, 
         sort_by : str = 'DATE') -> pd.DataFrame:
     """
@@ -94,6 +96,4 @@ def impute_forward_fill(
     # return dataframe with forward-filled data
     return ibis.memtable(df)
 
-
-    
     
