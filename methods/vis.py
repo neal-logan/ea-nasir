@@ -9,27 +9,6 @@ def plot_time_series_diffs(
         number_of_diffs: int = 4,
         figsize=(30, 30),
         colors=['orange','green','blue','violet','indigo']):
-    """
-    Plot each numeric column in the dataframe with its original data and successive differences.
-    
-    Parameters:
-    -----------
-    df : pandas.DataFrame
-        Input dataframe containing time series data
-    date_column : str
-        Name of the column containing dates
-    number_of_diffs : int
-        Number of differences to compute and plot
-    figsize : tuple
-        Size of the figure (width, height)
-    colors : list
-        List of colors to use for the original data and differences
-    
-    Returns:
-    --------
-    tuple : (matplotlib.figure.Figure, numpy.ndarray)
-        The created figure and array of axes objects containing all subplots
-    """
     
     # Get numeric columns excluding the date column
     numeric_cols = df.select_dtypes(include=[np.number]).columns
@@ -81,28 +60,13 @@ def plot_time_series_diffs(
     plt.show()
     return fig, axes
 
-# Example usage:
-"""
-# Create sample data
-dates = pd.date_range(start='2023-01-01', end='2023-12-31', freq='D')
-df = pd.DataFrame({
-    'DATE': dates,
-    'Value1': np.random.normal(0, 1, len(dates)).cumsum(),
-    'Value2': np.sin(np.linspace(0, 4*np.pi, len(dates))) * 10
-})
-
-# Create the plot
-fig = plot_time_series_diffs(df, date_column='DATE', number_of_diffs=2)
-plt.show()
-"""
-
-
 def plot_pairwise_time_series_matrix(
         df : pd.DataFrame, 
         figsize = (30,30),
         datecol : str = 'DATE',
-        i_color = 'violet',
-        j_color = 'indigo'):
+        i_color = 'green',
+        j_color = 'indigo',
+        ratio_color = 'blue'):
 
     dates = df[datecol]
     df = df.drop(datecol,axis='columns')
@@ -111,7 +75,6 @@ def plot_pairwise_time_series_matrix(
     # Create figure with subplots
     fig, axes = plt.subplots(n_cols,n_cols,figsize=figsize)
 
-    
     # Create plot matrix
     for i in range(0,n_cols):
         for j in range(0,n_cols):
@@ -120,43 +83,36 @@ def plot_pairwise_time_series_matrix(
             if i == j:
                 pass
             
-            # Lower triangle: Diff1 pairwise
+            # Lower triangle: ratios
             elif j < i:
-                pass                
-                # ax1 = plt.subplot(n_cols, n_cols, i*n_cols + j+1)
+                ax1 = plt.subplot(n_cols, n_cols, i*n_cols + j+1)
+                    
+                # Get column names
+                col1 = df.columns[i]
+                col2 = df.columns[j]
+                
+                values = df[col1]/df[col2]
 
-                # # Get column names
-                # col1 = df.columns[j]
-                # col2 = df.columns[i]
-                
-                # feature1 = df[col1].copy()
-                # feature2 = df[col2].copy().diff()
+                label = col1 + ' / ' + col2
 
-                # # Plot first time series on left y-axis
-                # ax1.set_ylabel(col1, color=i_color)
-                # line1 = ax1.plot(dates, feature1, color=i_color, label=col1)
-                # ax1.tick_params(axis='y', labelcolor=i_color)
+                # Plot first time series on left y-axis
+                ax1.set_ylabel(label)
+                line1 = ax1.plot(dates, values, color=ratio_color, label=label)
+                ax1.tick_params(axis='y', labelcolor=ratio_color)
                 
-                # # Create second y-axis and plot second time series
-                # ax2 = ax1.twinx()
-                # ax2.set_ylabel(col2, color=j_color)
-                # line2 = ax2.plot(dates, feature2, color=j_color, label=col2)
-                # ax2.tick_params(axis='y', labelcolor=j_color)
+                # Format date on x-axis
+                date_formatter = DateFormatter("%Y-%m")
+                ax1.xaxis.set_major_formatter(date_formatter)
+                plt.xticks(rotation=45)
                 
-                # # Format date on x-axis
-                # date_formatter = DateFormatter("%Y-%m-%d")
-                # ax1.xaxis.set_major_formatter(date_formatter)
-                # plt.xticks(rotation=45)
+                # Add legend
+                lines = line1
+                labels = [l.get_label() for l in lines]
+                ax1.legend(lines, labels, loc='upper left', fontsize='small')
                 
-                # # Add legend
-                # lines = line1 + line2
-                # labels = [l.get_label() for l in lines]
-                # ax1.legend(lines, labels, loc='upper left', fontsize='small')
-                
-                # # Make axis labels smaller
-                # ax1.tick_params(axis='x', labelsize=8)
-                # ax1.tick_params(axis='y', labelsize=8)
-                # ax2.tick_params(axis='y', labelsize=8)
+                # Make axis labels smaller
+                ax1.tick_params(axis='x', labelsize=7)
+                ax1.tick_params(axis='y', labelsize=7)             
             
             # Upper triangle: Original Data
             else:
@@ -178,7 +134,7 @@ def plot_pairwise_time_series_matrix(
                 ax2.tick_params(axis='y', labelcolor=j_color)
                 
                 # Format date on x-axis
-                date_formatter = DateFormatter("%Y-%m-%d")
+                date_formatter = DateFormatter("%Y-%m")
                 ax1.xaxis.set_major_formatter(date_formatter)
                 plt.xticks(rotation=45)
                 
@@ -188,12 +144,68 @@ def plot_pairwise_time_series_matrix(
                 ax1.legend(lines, labels, loc='upper left', fontsize='small')
                 
                 # Make axis labels smaller
-                ax1.tick_params(axis='x', labelsize=8)
-                ax1.tick_params(axis='y', labelsize=8)
-                ax2.tick_params(axis='y', labelsize=8)
+                ax1.tick_params(axis='x', labelsize=7)
+                ax1.tick_params(axis='y', labelsize=7)
+                ax2.tick_params(axis='y', labelsize=7)
 
     plt.tight_layout()
     plt.show()
     return fig, axes
 
+    import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+from matplotlib.dates import DateFormatter
+def plot_feature_correlation_matrix(
+        df : pd.DataFrame, 
+        figsize=(15,15),
+        gridsize=15,
+        hexbin_cmap = 'plasma',
+        dist_color = 'violet',
+        dist_edge_color = 'indigo',
+        scatter_color = 'indigo',
+        scatter_alpha = 0.3):
+    cols = df.columns
+    n_cols = len(cols)
     
+    # Create figure with subplots
+    fig, axes = plt.subplots(n_cols, n_cols, figsize=figsize)
+    
+    # Create plot matrix
+    for i in range(n_cols):
+        for j in range(n_cols):
+            ax = axes[i, j]
+            
+            # Diagonal: single-feature distribution
+            if i == j:
+                ax.hist(
+                    df[cols[i]], 
+                    bins=40,
+                    color = dist_color,
+                    edgecolor=dist_edge_color)
+                ax.set_title(f'Distribution of {cols[i]}')
+            
+            # Lower triangle: hexbin plots
+            elif j < i:
+                ax.hexbin(
+                        df[cols[j]], 
+                        df[cols[i]], 
+                        gridsize=gridsize, 
+                        cmap=hexbin_cmap, 
+                        mincnt=1)
+                ax.set_xlabel(cols[j])
+                ax.set_ylabel(cols[i])
+            
+            # Upper triangle: scatterplots
+            else:
+                ax.scatter(
+                        df[cols[j]], 
+                        df[cols[i]], 
+                        alpha=scatter_alpha,
+                        color=scatter_color,
+                        edgecolor='none')
+                ax.set_xlabel(cols[j])
+                ax.set_ylabel(cols[i])
+    
+    plt.tight_layout()
+    plt.show()
