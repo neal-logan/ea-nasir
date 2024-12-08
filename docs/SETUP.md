@@ -1,5 +1,5 @@
 
-### Setup
+### Setup for Notebooks
 
 Install with pip:
 
@@ -8,4 +8,7 @@ python -m pip install --upgrade pip
 python -m pip install -r requirements.txt
 ```
 
-TODO set up Jupyter server using Dockerfile
+TODO create docker-Jupyter option?
+
+
+### 

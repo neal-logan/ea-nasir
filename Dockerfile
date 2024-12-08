@@ -1,18 +1,19 @@
-# Dockerfile
-# NOT YET TESTED
+# https://www.docker.com/blog/supercharging-ai-ml-development-with-jupyterlab-and-docker/
 
-FROM python:3.11-slim
+FROM jupyter/base-notebook
 
-WORKDIR /workspace
+# Copy in project methods library into image
+COPY ./methods ./methods
 
-# Install essential packages
-RUN apt-get update && apt-get install -y \
-    git \
-    && rm -rf /var/lib/apt/lists/*
-
-# Install Python packages
+# Copy requirements into image
 COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
+
+# Update pip, install requirements
+RUN pip install --upgrade pip
+RUN python -m pip install --no-cache -r requirements.txt
+
+# Expose port to serve from
+EXPOSE 8888
 
 # Keep container running
 CMD ["bash"]

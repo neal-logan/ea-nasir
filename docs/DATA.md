@@ -2,30 +2,25 @@
 
 - [Copper](https://www.cmegroup.com/education/articles-and-reports/copper-financial-futures-faq.html)
 
-##### Features - Commodities Markets
+##### Features and Sources
 
-**Investing.com**
-- Copper
-- Corn
-- Gold
-- Lumber
-- Natural gas
-- Crude oil
-- Soy
+[**Investing.com**](https://www.investing.com/)
+- COPPER: Copper futures
+- GOLD: Gold futures
+- LUMBER: Lumber futures
+- NATGAS: Natural gas futures
+- OIL: Crude oil futures
+- CORN: Corn futures
+- SOY: Soy future
+- R2000: Russell 2000 index
+- SP500: S&P 500 index
+- VIX: Volatility index
 
-###### Features - Equities Markets
-
-**Investing.com**
-- Russell 2000
-- S&P 500
-- VIX (volatility)
-
-###### Features - Economic Indicators
-
-**FRED**
-- Consumer sentiment
-- CPI
-- Hourly wages
-- Median house price
-- Housing starts
-- Unemployment rate
+[**FRED: Federal Reserve Economic Data**](https://fred.stlouisfed.org/)
+- CSENT: US consumer sentiment
+- CPI: US consumer price index
+- POP: US population
+- WAGE: US hourly wages
+- HOUSEPRICE: Median US house prices
+- HOUSESTARTS:  US housing starts
+- UNEMPLOYMENT: US unemployment rate U3

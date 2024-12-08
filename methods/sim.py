@@ -53,8 +53,18 @@ class PortfolioAgent:
 
             # state and action rules
             rebalance_limit : float = 0.11,
-            asset_balance_steps : list = [0.0,0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9,1.0],
-            fc_delta_breakpoints : list = [-0.045, -0.024 -0.011,-0.003,0.003,0.011,0.024,0.045]):
+            asset_balance_steps : list = [x/10.0 for x in range(11)],
+            fc_delta_breakpoints : list = [
+                -0.045, 
+                -0.024,
+                -0.011,
+                -0.003,
+                0.003,
+                0.011,
+                0.024,
+                0.045]):
+
+        
 
         # start state
         self.current_date = start_date
@@ -70,11 +80,11 @@ class PortfolioAgent:
         self.fc_delta_breakpints = fc_delta_breakpoints # discretization of expected changes in price
         self.fc_delta_steps : list = [x for x in range(len(fc_delta_breakpoints)+1)]    
 
-        # Build the Q-learning matrix
+        # Build the policy-learning matrix
         # dict[(int,int) -> dict[int -> float]]
-        # outer dictionary maps state(current portfolio state, 
+        # Outer dictionary maps state(current portfolio state, 
         # market forecast) to action (a rebalanced portfolio state)
-        # inner dictionary maps action to weight
+        # Inner dictionary maps action to weight
         self.state_action_weight_matrix = {}
         number_asset_balance_steps = len(asset_balance_steps)
         for asset_bal_state_index, fc_delta_step in enumerate(range(number_asset_balance_steps),
