@@ -266,7 +266,7 @@ def plot_time_series_diffs(
 
 def plot_decomp(data : ibis.Table,
         date_col : str = 'DATE',
-        cmap = 'plasma',):
+        colormap : str = 'plasma',):
 
     # Move to dataframe, sorted by date
     df = data.to_pandas().sort_values(date_col)
@@ -277,7 +277,7 @@ def plot_decomp(data : ibis.Table,
 
     # Establish colorset & align features
     num_features = len(df.columns)
-    cmap = colormaps['plasma'] 
+    cmap = colormaps[colormap] 
     colorset = [cmap(i/num_features) for i in range(num_features)]
     feature_names_sorted = sorted(df.columns)
 
