@@ -7,7 +7,8 @@ con = ibis.connect("duckdb://")
 # Adding prefixes to each column based on dataset name 
 def merge_tables(
         tables_to_merge : dict[str, ibis.Table],
-        join_type : str) -> ibis.Table:
+        join_type : str = 'outer',
+        add_names : bool = False) -> ibis.Table:
     
     """
     Merge multiple Ibis tables with column name prefixing based on dataset names.
@@ -48,10 +49,11 @@ def merge_tables(
         # df_new = df_new.drop(col, axis='columns')
 
         # Rename feature columns in current dataset to include the dataset name
-        for col in curr_dset.columns:
-            if 'DATE' not in col:
-                new_feature_name = curr_dset_name + '_' + col
-                curr_dset = curr_dset.rename({new_feature_name : col})
+        if add_names:
+            for col in curr_dset.columns:
+                if 'DATE' not in col:
+                    new_feature_name = curr_dset_name + '_' + col
+                    curr_dset = curr_dset.rename({new_feature_name : col})
 
 
         # Outer join the datasets on date

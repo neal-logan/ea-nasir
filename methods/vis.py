@@ -75,7 +75,7 @@ def plot_pairwise_time_series_matrix(
                     rotation=60)
 
                 # Add legend
-                lines = [line_left]
+                lines = line_left
                 labels = [l.get_label() for l in lines]
                 ax_left.legend(
                     lines, 
@@ -118,7 +118,7 @@ def plot_pairwise_time_series_matrix(
                 ax_left.tick_params(axis='x', rotation=60)
                 
                 # Legend
-                lines = [line_left, line_right]
+                lines = line_left + line_right
                 labels = [l.get_label() for l in lines]
                 ax_left.legend(
                     lines, 
