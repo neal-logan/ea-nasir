@@ -11,27 +11,26 @@ random_seed = 42
 def train():
     random.seed(a=random_seed, version=2)
 
+# def get_next_trading_date(
+#         df : pd.DataFrame,
+#         current_date : np.datetime64,
+#         date_column : str = 'DATE',
+#         trading_day_column : str = 'copper_TRADING_DAY') -> np.datetime64:
+#     check_date = current_date + datetime.timedelta(days=1)
+#     while df.loc[df[date_column] == check_date, trading_day_column] is not True:
+#         check_date = check_date + datetime.timedelta(days=1)
+#     return check_date
 
-def get_next_trading_date(
-        df : pd.DataFrame,
-        current_date : np.datetime64,
-        date_column : str = 'DATE',
-        trading_day_column : str = 'copper_TRADING_DAY') -> np.datetime64:
-    check_date = current_date + datetime.timedelta(days=1)
-    while df.loc[df[date_column] == check_date, trading_day_column] is not True:
-        check_date = check_date + datetime.timedelta(days=1)
-    return check_date
-
-class MarketEnvironment:
-    def __init__(
-              self,
-              df : pd.DataFrame,
-              date_column : str = 'DATE',
-              trading_day_column : str = 'copper_TRADING_DAY'):
+# class MarketEnvironment:
+#     def __init__(
+#               self,
+#               df : pd.DataFrame,
+#               date_column : str = 'DATE',
+#               trading_day_column : str = 'copper_TRADING_DAY'):
         
-        self.df = df.sort_values(date_column)
-        self.date_column = date_column
-        self.trading_day_column = trading_day_column
+#         self.df = df.sort_values(date_column)
+#         self.date_column = date_column
+#         self.trading_day_column = trading_day_column
 
 # https://en.wikipedia.org/wiki/Reinforcement_learning
 class PortfolioAgent:
@@ -53,19 +52,10 @@ class PortfolioAgent:
 
             # state and action rules
             rebalance_limit : float = 0.11,
-            asset_balance_steps : list = [x/10.0 for x in range(11)],
-            fc_delta_breakpoints : list = [
-                -0.045, 
-                -0.024,
-                -0.011,
-                -0.003,
-                0.003,
-                0.011,
-                0.024,
-                0.045]):
-
-        
-
+            asset_balance_steps : list = [x/10.0 for x in range(11)],):
+            
+            # Export this
+            
         # start state
         self.current_date = start_date
         self.asset_balance_index = asset_start_index
@@ -77,9 +67,7 @@ class PortfolioAgent:
         # state and action rules
         self.rebalance_limit = rebalance_limit
         self.asset_balance_steps = asset_balance_steps
-        self.fc_delta_breakpints = fc_delta_breakpoints # discretization of expected changes in price
-        self.fc_delta_steps : list = [x for x in range(len(fc_delta_breakpoints)+1)]    
-
+    
         # Build the policy-learning matrix
         # dict[(int,int) -> dict[int -> float]]
         # Outer dictionary maps state(current portfolio state, 
@@ -102,7 +90,7 @@ class PortfolioAgent:
             
             self.state_action_weight_matrix[asset_bal_state_index,fc_delta_step] = action_weight.copy()
 
-        
+    # TODO adapt this
     def get_state(self, market) -> tuple[int,int]:
         
         columns = [self.traded_current_column, self.traded_fc_column]
@@ -150,22 +138,19 @@ class PortfolioAgent:
             
             price_change : str):
 
-        (next_price - current_price)*allocation
+        updated_weights = 5
 
         # Calculate reward as rate of return on overall portfolio
-        return 
+        return updated_weights
     
     # one cycle of decision-making
     # includes training if necessary
-    def step(
-        self,
+    def step(self,
         action : int, 
-        
         learning : bool,
         exploring : bool):
-        
+
         # get the decision
-
-        # 
-
+        return None        
+        
 

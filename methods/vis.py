@@ -297,12 +297,43 @@ def plot_decomp(data : ibis.Table,
     ax=plt.gca()
     ax.xaxis.set_major_formatter(date_formatter)
 
-    # Customize the plot
+    # Customize the labels
     plt.xlabel('Date', fontsize=12)
     plt.ylabel('Value', fontsize=12)
-
-    # Rotate x-axis labels for better readability
     plt.xticks(rotation=45)
 
     plt.tight_layout()
     plt.show()
+
+
+def plot_train_pred_test(
+    train_dates : pd.DataFrame,
+    train_data : pd.DataFrame,
+    test_dates : pd.DataFrame,
+    test_data: pd.DataFrame,
+    pred_dates : pd.DataFrame,
+    pred_data : pd.DataFrame):
+    
+    fig, ax=plt.subplots(figsize=(12, 6))
+
+    plt.plot(train_dates,
+        train_data,
+        label = 'Training')
+
+    plt.plot(test_dates,
+        test_data,
+        label = 'Validation')
+
+    plt.plot(pred_dates,
+            pred_data,
+            label = 'Prediction')
+
+    # Legend
+    ax.legend()
+
+    # Customize the labels
+    plt.xlabel('Date', fontsize=12)
+    plt.ylabel('Value', fontsize=12)
+    plt.xticks(rotation=45)
+
+    return fig, ax

@@ -9,30 +9,6 @@ def merge_tables(
         tables_to_merge : dict[str, ibis.Table],
         join_type : str = 'outer',
         add_names : bool = False) -> ibis.Table:
-    
-    """
-    Merge multiple Ibis tables with column name prefixing based on dataset names.
-
-    Parameters:
-    -----------
-    tables_to_merge : dict[str, ibis.Table]
-        Dictionary of tables to merge, with dataset names as keys
-    join_key : str, default 'DATE'
-        Column name used for joining tables
-    join_type : str, default 'innter'
-        Type of join to perform (e.g., 'inner', 'left', 'right', 'outer')
-
-    Returns:
-    --------
-    ibis.Table
-        A single merged table with columns prefixed by their original dataset names, 
-        joined on the specified join key using the specified join type
-    
-    Notes:
-    ------
-    - Columns with the join key are not prefixed
-    - Duplicate column names are handled by prefixing with dataset names
-    """
     join_key = 'DATE'
     merged_tables = None
 
@@ -44,9 +20,6 @@ def merge_tables(
         # Start with dates only
         if merged_tables is None:
             merged_tables = ibis.memtable(curr_dset.to_pandas()['DATE'])
-        
-        # df_new[str(year) + '_' + col] = df_new[col]
-        # df_new = df_new.drop(col, axis='columns')
 
         # Rename feature columns in current dataset to include the dataset name
         if add_names:
@@ -54,7 +27,6 @@ def merge_tables(
                 if 'DATE' not in col:
                     new_feature_name = curr_dset_name + '_' + col
                     curr_dset = curr_dset.rename({new_feature_name : col})
-
 
         # Outer join the datasets on date
         merged_tables = ibis.join(
@@ -127,3 +99,6 @@ def annual_decomposition(
         join_type = 'outer')
     
     return table_annual_decomp
+
+
+
