@@ -6,9 +6,9 @@
 - [Notebook: **Forecasting Model Development**](02_forecasting.ipynb) - Covers additional feature engineering and forecast modeling.  Outputs including forecasts and other engineered features passed along to Decisioning via [data_decisioning](/data_decisioning/) folder.
 - [Notebook: **Decisioning Model Development**](03_decisioning.ipynb) - Covers final feature engineering and agent training/simulations.  No outputs yet.
 
-### Setup:
+### Setup
 
-NOTE:  The notebooks will not function without the [methods](/methods/) folder and their respective data folders.
+NOTE:  The notebooks will not function without the [methods](/methods/) folder and their respective data folders.  
 
 Clone the git repo:
 
@@ -22,6 +22,8 @@ Install requirements with pip:
 python -m pip install --upgrade pip
 python -m pip install -r requirements.txt
 ```
+
+Developed on Windows 10 with Python 3.11.9 - see requirements.txt for all other requirements
 
 ### Incomplete Items
 
