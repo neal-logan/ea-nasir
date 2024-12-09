@@ -46,7 +46,7 @@ class PortfolioAgent:
             
             # Hyperparameters: learning and exploring
             learning_rate : float = 0.05,
-            exploration_chance : float = 0.3,
+            explore_chance : float = 0.3,
 
             # state and action rules
             rebalance_limit_steps : int = 2,
@@ -54,7 +54,7 @@ class PortfolioAgent:
 
         # learning and exploration
         self.learning_rate = learning_rate
-        self.exploration_chance = exploration_chance
+        self.explore_chance = explore_chance
 
         # state and action rules
         self.rebalance_limit_steps = rebalance_limit_steps
@@ -69,10 +69,10 @@ class PortfolioAgent:
         # States over time
         self.asset_balance_at_open_ind = [np.NaN for x in range(len(data))]
         self.asset_balance_at_open_ind[0] = 0
-        self.asset_balance_decision_ind = [np.NaN for x in range(len(data))]
         self.current_step = 0
 
-        self.portfolio_value = 1000000
+        self.portfolio_value = [np.NaN for x in range(len(data))]
+        self.portfolio_value[0] = 1000000
 
         # Build the policy-learning matrix
         # dict[(int,int) -> dict[int -> float]]
@@ -81,113 +81,130 @@ class PortfolioAgent:
         # Inner dictionary maps action to weight
         self.state_action_weight_matrix = {}
 
-        for current_asset_balance_ind, fc_delta_bin in enumerate(
-            range(len(asset_balance_steps)),
-            data[price_delta_pred_bins_col].nunique()):
-            
-            # Start a new set of action_weight mappings for this
-            # combination of current portfolio state and market conditions
-            for action in self.get_legal_actions_provisional(current_asset_balance_ind):
-                self.state_action_weight_matrix[current_asset_balance_ind,fc_delta_bin] = {action : 0.0}
+        unique_pred_bins = data[price_delta_pred_bins_col].nunique()
+
+        for current_asset_balance_ind in range(len(asset_balance_steps)):
+            for fc_delta_bin in range(unique_pred_bins):
+                
+                state = (current_asset_balance_ind,fc_delta_bin)
+
+                action_dict = {}
+                # Start a new set of action_weight mappings for this
+                # combination of current portfolio state and market conditions
+                for action in self.get_legal_actions_provisional(current_asset_balance_ind):
+                    action_dict[action] = 0
+                self.state_action_weight_matrix[state] = action_dict
 
     
 
-    def get_current_state(self)->tuple[int,int]:
-        return (self.asset_balance_at_open_ind[self.current_step], self.data.loc[self.current_step])
+    def get_current_state_for_decision(self)->tuple[int,int]:
+        return (self.asset_balance_at_open_ind[self.current_step], #Current asset balance
+                self.data[self.price_delta_pred_bins_col].iat[self.current_step+1])  #Predicted next price delta
 
     def get_legal_actions_provisional(self, asset_bal)->int:
         return [x for x in range(len(self.asset_balance_steps)) 
-                if abs(x - asset_bal)<self.rebalance_limit_steps]
+                if abs(x - asset_bal) <= self.rebalance_limit_steps]
     
     def get_legal_actions(self)->int:
         return [x for x in range(len(self.asset_balance_steps)) 
-                if abs(x - self.asset_balance_at_open_ind)<self.rebalance_limit_steps]
+                    if abs(x - self.asset_balance_at_open_ind[self.current_step]) 
+                    <= self.rebalance_limit_steps]
 
     def get_best_action(self)->int:
-        choice = None
-        highest_weight = None
 
-        # Shuffle to avoid bias in case of ties
-        shuffled_actions = random.shuffle(self.state_action_weight_matrix[self.get_current_state()].items())
-        
-        # Get highest weight with bias toward first in shuffled_actions dict
-        for action,weight in shuffled_actions:
-            if choice is None:
-                choice = action
+        action_weight_matrix = self.state_action_weight_matrix[self.get_current_state_for_decision()]
+        highest_weights = None
+        best_actions = []
+
+        # Get highest weight and best actions
+        for action,weight in action_weight_matrix.items():
+            if highest_weights is None:
+                best_actions.append(action)
                 highest_weight = weight
+            elif weight == highest_weight:
+                best_actions.append(action)
             elif weight > highest_weight:
-                choice = action
+                best_actions = [action]
                 highest_weight = weight
             else:
                 pass
-        return choice
+
+        # Randomly select from the best actions
+        return random.choice(best_actions)
 
 
     def get_prev_states_lookback(self,num_steps : int)-> list[tuple[int,int]]:
         prev_states = []
         for i in range (max(self.current_step-num_steps,0), self.current_step):
             prev_states.append((self.asset_balance_at_open_ind[i], 
-                self.data[self.price_delta_pred_bins_col].loc[i]))
+                self.data[self.price_delta_pred_bins_col].iat[i]))        
         return prev_states
 
     def get_prev_actions_lookback(self, num_steps : int)-> list[int]:
         prev_actions = []
         for i in range (max(self.current_step-num_steps,0), self.current_step):
-            prev_actions.append(self.asset_balance_decision_ind)
+            prev_actions.append(self.asset_balance_at_open_ind[i+1])
+        return prev_actions
 
     def update_weights_indiscriminate_lookback(self, num_steps : int):
         prev_states = self.get_prev_states_lookback(num_steps)
         prev_actions = self.get_prev_actions_lookback(num_steps)
 
+        # print(prev_states)
+        # print(prev_actions)
+
         # Reward based on daily change in value of portfolio
-        reward = self.data[self.price_delta_col] * self.asset_balance_steps[self.asset_balance_at_open_ind]
+        reward = (self.data[self.price_delta_col].iat[self.current_step]
+                  * self.asset_balance_steps[self.asset_balance_at_open_ind[self.current_step]])
         
         weight_update = reward * self.learning_rate
         
+        # print(str(weight_update))
+
         for i in range(len(prev_states)):
-            self.state_action_weight_matrix[prev_states[i]][prev_actions[i]] += weight_update
+            new_val = self.state_action_weight_matrix[prev_states[i]][prev_actions[i]] + weight_update
+            self.state_action_weight_matrix[prev_states[i]][prev_actions[i]] = new_val
 
     def step(self, 
             exploring : bool,
             learning : bool,
             learning_lookback_steps: int = 5):
 
+        # Make next decision
+        if exploring and random.random() < self.explore_chance:
+            self.asset_balance_at_open_ind[self.current_step+1] = random.choice(self.get_legal_actions()) # Choose randomly among legal actions
+        else: 
+            self.asset_balance_at_open_ind[self.current_step+1] = self.get_best_action()  # Get highest-weighted choice
+        
         # STOP If we're out of data for simulation
-        if self.current_step >= len(self.data):
+        # Otherwise iterate to next step and learn from decision
+        if self.current_step + 1 >= len(self.data):
             # probably need to throw an error or something
-            return
+            return False
+        else:
+            # Iterate steps
+            self.current_step = self.current_step + 1
 
         # Update portfolio value
-        wealth += wealth * self.asset_balance_steps[self.asset_balance_at_open_ind] * self.data[self.price_delta_col]
+        commodity_value = (self.portfolio_value[self.current_step-1]
+                                 * self.asset_balance_steps[self.asset_balance_at_open_ind[self.current_step]] 
+                                 * self.data[self.price_delta_col].iat[self.current_step])
 
-        # Decide
-        if exploring and random.random < self.explore_chance:
-            self.asset_balance_decision_ind = random.choice(self.get_legal_actions()) # Choose randomly among legal actions
-        else: 
-            self.asset_balance_decision_ind = self.get_best_action()  # Get highest-weighted choice
-        
+        cash_value = (self.portfolio_value[self.current_step-1]
+                                 * 1 - self.asset_balance_steps[self.asset_balance_at_open_ind[self.current_step]]) 
+
+        self.portfolio_value[self.current_step] = commodity_value + cash_value
 
         # Learn from previous actions
         if learning:
             self.update_weights_indiscriminate_lookback(num_steps=learning_lookback_steps)
 
-        # Iterate steps
-        self.current_step = self.current_step + 1
 
+        return True
 
-
-
-
-    
-    
-    # one cycle of decision-making
-    # includes training if necessary
-    def step(self,
-        action : int, 
-        learning : bool,
-        exploring : bool):
-
-        # get the decision
-        return None        
-        
+    def print_model(self):
+        for state,action_weight_matrix in agent.state_action_weight_matrix.items():
+            print('State:  ' + str(state) + '->')
+            for action,weight in action_weight_matrix.items():
+                print('     Action->Weight:  ' + str(action) + '->' + str(weight))
 

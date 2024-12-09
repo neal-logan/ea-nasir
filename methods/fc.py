@@ -43,6 +43,10 @@ def add_fc_eval_columns(
     df[pred_feature+'_DELTA'] = df[pred_feature+''] - df[pred_feature+''].shift(1)
     df[pred_feature+'_DELTA_PRED'] = df[pred_feature+'_PRED'] - df[pred_feature+''].shift(1)
 
+    # Calculate proportional delta and predicted delta
+    df[pred_feature+'_PROPDELTA'] = (df[pred_feature+''] - df[pred_feature+''].shift(1))/df[pred_feature+''].shift(1)
+    df[pred_feature+'_PROPDELTA_PRED'] = (df[pred_feature+'_PRED'] - df[pred_feature+''].shift(1))/df[pred_feature+''].shift(1)
+
     # Calculate sign of delta and predicted delta
     df[pred_feature+'_DELTA_SIGN'] = np.sign(df[pred_feature+'_DELTA'])
     df[pred_feature+'_DELTA_SIGN_PRED'] = np.sign(df[pred_feature+'_DELTA_PRED'])
