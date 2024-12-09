@@ -15,7 +15,7 @@ def sliding_window_arima_predictions(
     # Add a column to the dataframe for the prediction
     df[target_pred_name] = np.nan
 
-    for pred_step in range(window_size, len(df)-1):
+    for pred_step in range(window_size, len(df)):
         training_window_start_step = pred_step-window_size
 
         # Fit the model on the most recent window
