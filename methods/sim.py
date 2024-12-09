@@ -6,8 +6,6 @@ from sklearn.preprocessing import KBinsDiscretizer
 import datetime
 import random
 
-random_seed = 42
-
 # def train():
 #     random.seed(a=random_seed, version=2)
 
@@ -50,7 +48,8 @@ class PortfolioAgent:
 
             # state and action rules
             rebalance_limit_steps : int = 2,
-            asset_balance_steps : list = [x/10.0 for x in range(11)],):
+            asset_balance_steps : list = [x/10.0 for x in range(11)],
+            random_seed : int = 42):
 
         # learning and exploration
         self.learning_rate = learning_rate
@@ -73,6 +72,8 @@ class PortfolioAgent:
 
         self.portfolio_value = [np.NaN for x in range(len(data))]
         self.portfolio_value[0] = 1000000
+
+        random.seed = random_seed
 
         # Build the policy-learning matrix
         # dict[(int,int) -> dict[int -> float]]
@@ -170,20 +171,19 @@ class PortfolioAgent:
             learning : bool,
             learning_lookback_steps: int = 5):
 
-        # Make next decision
+        # STOP If we're out of data for simulation
+        if self.current_step + 1 >= len(self.data):
+            # probably need to throw an error or something
+            return False
+
+        # Make decision
         if exploring and random.random() < self.explore_chance:
             self.asset_balance_at_open_ind[self.current_step+1] = random.choice(self.get_legal_actions()) # Choose randomly among legal actions
         else: 
             self.asset_balance_at_open_ind[self.current_step+1] = self.get_best_action()  # Get highest-weighted choice
         
-        # STOP If we're out of data for simulation
-        # Otherwise iterate to next step and learn from decision
-        if self.current_step + 1 >= len(self.data):
-            # probably need to throw an error or something
-            return False
-        else:
-            # Iterate steps
-            self.current_step = self.current_step + 1
+        # Iterate to next step and learn from decision
+        self.current_step = self.current_step + 1
 
         # Update portfolio value
         commodity_value = (self.portfolio_value[self.current_step-1]
@@ -199,12 +199,11 @@ class PortfolioAgent:
         if learning:
             self.update_weights_indiscriminate_lookback(num_steps=learning_lookback_steps)
 
-
         return True
 
     def print_model(self):
-        for state,action_weight_matrix in agent.state_action_weight_matrix.items():
-            print('State:  ' + str(state) + '->')
+        for state,action_weight_matrix in self.state_action_weight_matrix.items():
+            print('State (Current Portfolio Balance, Prediction Bin):  ' + str(state) + ' -> ')
             for action,weight in action_weight_matrix.items():
-                print('     Action->Weight:  ' + str(action) + '->' + str(weight))
+                print('     Action (New Portfolio Weight)->Weight:  ' + str(action) + ' -> ' + str(weight))
 

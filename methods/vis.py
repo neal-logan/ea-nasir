@@ -337,3 +337,22 @@ def plot_train_pred_test(
     plt.xticks(rotation=45)
 
     return fig, ax
+
+
+def plot_time_series(
+    dates : pd.DataFrame,
+    data : pd.DataFrame,):
+    
+    fig, ax=plt.subplots(figsize=(12, 6))
+
+    plt.plot(dates, data)
+
+    # Legend
+    ax.legend()
+
+    # Customize the labels
+    plt.xlabel('Date', fontsize=12)
+    plt.ylabel('Value', fontsize=12)
+    plt.xticks(rotation=45)
+
+    return fig, ax
